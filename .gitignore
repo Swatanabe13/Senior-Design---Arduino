@@ -286,3 +286,8 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
+*.atsln
+*.xml
+*.cproj
+ARM_SPI_TO_PI/ARM_SPI_TO_PI/Device_Startup/samd21g18a_flash.ld
+*.ld
