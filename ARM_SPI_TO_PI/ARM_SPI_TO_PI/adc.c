@@ -66,7 +66,7 @@ void adc_init()
 	ADC->REFCTRL.bit.REFSEL = 2; // 1/2 VDDANA Halves voltage so we don't blow up
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
-	ADC->CTRLB.bit.PRESCALER = 00;
+	ADC->CTRLB.bit.PRESCALER = 07;
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
 	ADC->CTRLB.bit.DIFFMODE = 0;
