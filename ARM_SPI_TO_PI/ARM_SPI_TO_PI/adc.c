@@ -69,7 +69,9 @@ void adc_init()
 	ADC->CTRLB.bit.PRESCALER = 00;
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
-
+	ADC->CTRLB.bit.DIFFMODE = 0;
+	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
+	
 	ADC->CTRLB.bit.RESSEL = 3;		// 0 == 12-bit resolution. 
 									// 1 == 16-bit resolution. 
 									// 2 == 10-bit resolution. 
