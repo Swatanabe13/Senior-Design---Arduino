@@ -69,8 +69,9 @@ void adc_init()
 	ADC->CTRLB.bit.PRESCALER = 07;
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
-	ADC->CTRLB.bit.DIFFMODE = 0;
-	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
+	ADC->SAMPCTRL.bit.SAMPLEN = 0x00;
+	while (ADC->STATUS.bit.SYNCBUSY == 1 ) { };
+	
 	
 	ADC->CTRLB.bit.RESSEL = 3;		// 0 == 12-bit resolution. 
 									// 1 == 16-bit resolution. 
@@ -87,10 +88,10 @@ void adc_init()
 	ADC->INPUTCTRL.bit.MUXPOS = 00; //Using analog pin 0, MUXPOS should be 0. Change to 1 to simulate no input.
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 	
-	ADC->INPUTCTRL.bit.MUXNEG = 0x19; //I/O Ground 
+	ADC->INPUTCTRL.bit.MUXNEG = 0x19; //Internal Ground 
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 		
-    ADC->DBGCTRL.bit.DBGRUN = 0; //Use for DEBUGGING ONLY. TURN OFF when running for reals.
+    ADC->DBGCTRL.bit.DBGRUN = 1; //Use for DEBUGGING ONLY. TURN OFF when running for reals.
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
 }

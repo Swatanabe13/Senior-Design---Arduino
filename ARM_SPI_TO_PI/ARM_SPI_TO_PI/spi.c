@@ -168,9 +168,6 @@ void spi_init()
   // Set up CTRLB
   SERCOM4->SPI.CTRLB.bit.RXEN = 1; // Enable the receiver
   SERCOM4->SPI.CTRLB.bit.PLOADEN = 1; //Enable preload
-  
-  // Set up the BAUD rate	
-  SERCOM4->SPI.BAUD.reg = 239; //100KHz - too slow, but easy to see on the Logic Analyzer
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -180,13 +177,13 @@ void spi_init()
   // Wait for it to complete
   while (SERCOM4->SPI.SYNCBUSY.bit.ENABLE);
 
-//   //Enable interrupt
-//   NVIC_DisableIRQ(SERCOM4_IRQn);
-//   NVIC_ClearPendingIRQ(SERCOM4_IRQn);
-//   NVIC_SetPriority(SERCOM4_IRQn, 0);
-//   NVIC_EnableIRQ(SERCOM4_IRQn);
-// 
-//   SERCOM4->SPI.INTENSET.bit.TXC = 1; //Transfer complete byte
+  //Enable interrupt
+  NVIC_DisableIRQ(SERCOM4_IRQn);
+  NVIC_ClearPendingIRQ(SERCOM4_IRQn);
+  NVIC_SetPriority(SERCOM4_IRQn, 0);
+  NVIC_EnableIRQ(SERCOM4_IRQn);
+
+  SERCOM4->SPI.INTENSET.bit.DRE = 1; //Transfer complete byte
 
 }
 
@@ -203,9 +200,13 @@ uint8_t spi_read()
 //==============================================================================
 void spi(uint8_t* in_array)
 {
+	for (int i = 0; i < sizeof in_array; i++)
+	{
+		data[i] = in_array[i];
+	}
 	if (SERCOM4->SPI.INTFLAG.bit.DRE == 1)
 	{
-		SERCOM4->SPI.DATA.bit.DATA = in_array[0];
+		SERCOM4->SPI.DATA.bit.DATA = data[0];
 		//SERCOM4->SPI.INTENCLR.bit.DRE; done automatically by writing data
 	}
 }
@@ -229,15 +230,3 @@ void spi(uint8_t* in_array)
 //     | .__/ |  \  .__/
 //
 //------------------------------------------------------------------------------
-void SERCOM4_Handler()
-{
-	if (pos < sizeof data)
-	{
-		// Send the data
-		SERCOM4->SPI.DATA.bit.DATA = data[pos++];
-	}
-	else
-	{
-		pos = 0;
-	}
-}
