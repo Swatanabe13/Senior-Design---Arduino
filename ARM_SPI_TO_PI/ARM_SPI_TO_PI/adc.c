@@ -91,9 +91,18 @@ void adc_init()
 	ADC->INPUTCTRL.bit.MUXNEG = 0x19; //Internal Ground 
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 		
-    ADC->DBGCTRL.bit.DBGRUN = 1; //Use for DEBUGGING ONLY. TURN OFF when running for reals.
+    ADC->DBGCTRL.bit.DBGRUN = 0; //Use for DEBUGGING ONLY. TURN OFF when running for reals.
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
+	//Enable double-stuffed Oreo. Interrupts. It's interrupts.
+	NVIC_DisableIRQ(ADC_IRQn);
+	NVIC_ClearPendingIRQ(ADC_IRQn);
+	NVIC_SetPriority(ADC_IRQn, 0);
+	NVIC_EnableIRQ(ADC_IRQn);
+	
+	ADC->INTENSET.bit.RESRDY = 1;
+	ADC->INTENSET.bit.OVERRUN = 1;
+	//ADC->INTENSET.bit.SYNCRDY = 1;
 }
 
 //==============================================================================

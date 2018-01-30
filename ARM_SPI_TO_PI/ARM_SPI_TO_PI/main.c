@@ -18,7 +18,7 @@
 //     |__/ |___ |    | | \| |___ .__/
 //
 //----------------------------------------------------------------------------
-#define ADC_BUFFER_SIZE 5000
+#define ADC_BUFFER_SIZE 5500
 //-----------------------------------------------------------------------------
 //     ___      __   ___  __   ___  ___  __
 //      |  \ / |__) |__  |  \ |__  |__  /__`
@@ -58,14 +58,13 @@ int main(void)
     /* Initialize the SAM system */
     SystemInit();
 	spi_init();
-	adc_init(); 
+	adc_init();
+	 
    //When reading from Pi, last byte of data will be read first before beginning from data[0]
    while(1)
    {
-		while (ADC->STATUS.bit.SYNCBUSY == 1) {};	
-		enqueue_val(adc_queue, ADC->RESULT.reg);
-		
 		//Interrupt driven SPI will do the thing for you and dequeue
+		//Interrupt driven ADC will probably do the things for you and queue
    }
 }
 
@@ -117,4 +116,8 @@ int queue_empty()
 void SERCOM4_Handler()
 {
 	SERCOM4->SPI.DATA.reg = dequeue_val(adc_queue);
+}
+void ADC_Handler()
+{
+	enqueue_val(adc_queue, ADC->RESULT.reg);	
 }
