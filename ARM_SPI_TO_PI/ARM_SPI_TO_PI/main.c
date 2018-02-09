@@ -18,7 +18,7 @@
 //     |__/ |___ |    | | \| |___ .__/
 //
 //----------------------------------------------------------------------------
-#define ADC_BUFFER_SIZE 5500
+#define ADC_BUFFER_SIZE 4000
 //-----------------------------------------------------------------------------
 //     ___      __   ___  __   ___  ___  __
 //      |  \ / |__) |__  |  \ |__  |__  /__`
@@ -33,8 +33,10 @@
 //
 //-----------------------------------------------------------------------------
 static int adc_val;
+int data[2];
 int adc_queue[ADC_BUFFER_SIZE];
 int head = 0;
+int i= 0;
 int tail = 0;
 //-----------------------------------------------------------------------------
 //      __   __   __  ___  __  ___      __   ___  __
@@ -59,12 +61,10 @@ int main(void)
     SystemInit();
 	spi_init();
 	adc_init();
-	 
-   //When reading from Pi, last byte of data will be read first before beginning from data[0]
+   //Interrupt driven ADC and SPI will do all the work
    while(1)
    {
-		//Interrupt driven SPI will do the thing for you and dequeue
-		//Interrupt driven ADC will probably do the things for you and queue
+		//Just keep spinning, just keep spinning...
    }
 }
 
@@ -115,9 +115,19 @@ int queue_empty()
 //-----------------------------------------------------------------------------
 void SERCOM4_Handler()
 {
-	SERCOM4->SPI.DATA.reg = dequeue_val(adc_queue);
+	SERCOM4->SPI.DATA.bit.DATA = dequeue_val(adc_queue);	
 }
 void ADC_Handler()
 {
-	enqueue_val(adc_queue, ADC->RESULT.reg);	
+	
+	enqueue_val(adc_queue, ADC->RESULT.reg);
+// 	if (ADC->INTFLAG.bit.RESRDY == 0)
+// 	{
+// 		enqueue_val(adc_queue, 1);
+// 	}
+// 	else
+// 	{
+// 		enqueue_val(adc_queue, 0);
+// 	}
+	
 }
