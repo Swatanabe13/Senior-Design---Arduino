@@ -73,7 +73,7 @@ void adc_init()
 	while (ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 	
 	
-	ADC->CTRLB.bit.RESSEL = 3;		// 0 == 12-bit resolution. 
+	ADC->CTRLB.bit.RESSEL = 0;		// 0 == 12-bit resolution. 
 									// 1 == 16-bit resolution. 
 									// 2 == 10-bit resolution. 
 									// 3 ==  8-bit resolution. 
@@ -94,7 +94,7 @@ void adc_init()
     ADC->DBGCTRL.bit.DBGRUN = 0; //Use for DEBUGGING ONLY. TURN OFF when running for reals.
 	while(ADC->STATUS.bit.SYNCBUSY == 1 ) { };
 
-	//Enable double-stuffed Oreo. Interrupts. It's interrupts.
+	//Enable interrupts.
 	NVIC_DisableIRQ(ADC_IRQn);
 	NVIC_ClearPendingIRQ(ADC_IRQn);
 	NVIC_SetPriority(ADC_IRQn, 0);
@@ -102,7 +102,6 @@ void adc_init()
 	
 	ADC->INTENSET.bit.RESRDY = 1;
 	ADC->INTENSET.bit.OVERRUN = 1;
-	//ADC->INTENSET.bit.SYNCRDY = 1;
 }
 
 //==============================================================================

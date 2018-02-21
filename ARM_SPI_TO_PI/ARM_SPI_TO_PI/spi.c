@@ -184,7 +184,6 @@ void spi_init()
   NVIC_EnableIRQ(SERCOM4_IRQn);
 
   SERCOM4->SPI.INTENSET.bit.DRE = 1; //Transfer complete byte
-
 }
 
 

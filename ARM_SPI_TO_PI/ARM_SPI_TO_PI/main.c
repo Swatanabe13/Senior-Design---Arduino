@@ -18,7 +18,7 @@
 //     |__/ |___ |    | | \| |___ .__/
 //
 //----------------------------------------------------------------------------
-#define ADC_BUFFER_SIZE 4000
+#define ADC_BUFFER_SIZE 2
 //-----------------------------------------------------------------------------
 //     ___      __   ___  __   ___  ___  __
 //      |  \ / |__) |__  |  \ |__  |__  /__`
@@ -33,11 +33,20 @@
 //
 //-----------------------------------------------------------------------------
 static int adc_val;
-int data[2];
+
+//ADC_queue and variables
 int adc_queue[ADC_BUFFER_SIZE];
 int head = 0;
-int i= 0;
 int tail = 0;
+int val = 0;
+
+int high = 0;
+int low = 0;
+
+int i = 0;
+int queueNewVal = 0;
+int waitForTransfer = 0;
+int lowByteSent = 0;
 //-----------------------------------------------------------------------------
 //      __   __   __  ___  __  ___      __   ___  __
 //     |__) |__) /  \  |  /  \  |  \ / |__) |__  /__`
@@ -46,7 +55,7 @@ int tail = 0;
 //-----------------------------------------------------------------------------
 void enqueue_val(int * queue, int value);
 int dequeue_val(int * queue);
-int queue_empty();
+
 //-----------------------------------------------------------------------------
 //      __        __          __
 //     |__) |  | |__) |    | /  `
@@ -61,6 +70,7 @@ int main(void)
     SystemInit();
 	spi_init();
 	adc_init();
+	
    //Interrupt driven ADC and SPI will do all the work
    while(1)
    {
@@ -95,11 +105,6 @@ int dequeue_val (int * queue)
 	return value;
 }
 
-int queue_empty()
-{
-	return head == tail;
-}
-
 //-----------------------------------------------------------------------------
 //      __   __              ___  ___
 //     |__) |__) | \  /  /\   |  |__
@@ -115,19 +120,40 @@ int queue_empty()
 //-----------------------------------------------------------------------------
 void SERCOM4_Handler()
 {
-	SERCOM4->SPI.DATA.bit.DATA = dequeue_val(adc_queue);	
+	//New value
+	SERCOM4->SPI.DATA.bit.DATA = dequeue_val(adc_queue);
+	i++;
+	if (i > 1)
+	{
+		queueNewVal = 1;
+		waitForTransfer = 1;
+		i = 0;
+	}
 }
+
 void ADC_Handler()
 {
-	
-	enqueue_val(adc_queue, ADC->RESULT.reg);
-// 	if (ADC->INTFLAG.bit.RESRDY == 0)
-// 	{
-// 		enqueue_val(adc_queue, 1);
-// 	}
-// 	else
-// 	{
-// 		enqueue_val(adc_queue, 0);
-// 	}
-	
+	if (queueNewVal)
+	{
+		waitForTransfer = 1;
+		val = ADC->RESULT.reg;
+		queueNewVal = 0;
+	}
+	//If the SPI has transferred both bytes, queue up a new value
+	if (waitForTransfer == 1)
+	{
+		//If the low byte has not been queued yet, queue it up
+		if (lowByteSent == 0)
+		{
+			enqueue_val(adc_queue, val & 0xFF);
+			lowByteSent = 1;
+		}
+		//Send the high byte and set queueNewVal to true
+		else
+		{
+			enqueue_val(adc_queue, val >> 8);
+			lowByteSent = 0;
+			waitForTransfer = 0;
+		}
+	}
 }
